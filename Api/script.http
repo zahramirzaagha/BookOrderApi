@@ -1,0 +1,146 @@
+@Port = 7166
+@AuthorEndpoint = https://localhost:{{Port}}/api/authors
+@PublisherEndpoint = https://localhost:{{Port}}/api/publishers
+@BookEndpoint = https://localhost:{{Port}}/api/books
+@AccountEndpoint = https://localhost:{{Port}}/api/accounts
+@OrderEndpoint = https://localhost:{{Port}}/api/orders
+
+# @name CreateAuthor
+POST {{AuthorEndpoint}}
+Content-Type: application/json
+
+{
+    "firstName": "Martin",
+    "lastName": "Fowler",
+    "email": "mfowler@gmail.com"
+}
+
+###
+
+# @name CreatePublisher
+POST {{PublisherEndpoint}}
+Content-Type: application/json
+
+{
+    "name": "Addison-Wesley Professional"
+}
+
+###
+
+# @name CreateBook
+POST {{BookEndpoint}}
+Content-Type: application/json
+
+{
+    "isbn": "0201485672",
+    "title": "Refactoring: Improving the Design of Existing Code",
+    "category": 0,
+    "publisherId": "{{CreatePublisher.response.body.publisherId}}",
+    "yearPublished": 1999,
+    "edition": 1,
+    "unitPrice": 54.70,
+    "authorIds": [ "{{CreateAuthor.response.body.authorId}}" ]
+}
+
+###
+
+# @name AddInventory
+PUT {{BookEndpoint}}/{{CreateBook.response.body.bookId}}/addinventory
+Content-Type: application/json
+
+{
+    "inventory": 50
+}
+
+###
+
+# @name CreateAccount
+POST {{AccountEndpoint}}
+Content-Type: application/json
+
+{
+    "username": "nmirzaagha",
+    "password": "123456"
+}
+
+###
+
+# @name UpdateProfile
+PUT {{AccountEndpoint}}/{{CreateAccount.response.body.accountId}}/updateprofile
+Content-Type: application/json
+
+{
+    "name": "Zahra Mirzaagha",
+    "address": "20 Unknown, Apt 10",
+    "city": "Montreal",
+    "postalCode": "H1T 2B9",
+    "phoneNumber": "(514)654-87436",
+    "email": "zmirzaagha@gmail.com"
+}
+
+###
+
+# @name CreateOrder
+POST {{OrderEndpoint}}
+Content-Type: application/json
+
+{
+    "accountId": "{{CreateAccount.response.body.accountId}}",
+    "orderItems": [
+        {
+            "bookId": "{{CreateBook.response.body.bookId}}",
+            "quantity": 2
+        }
+    ]
+}
+
+###
+
+# @name ConfirmOrder
+PUT {{OrderEndpoint}}/{{CreateOrder.response.body.orderId}}/confirm
+
+###
+
+# @name PayOrder
+PUT {{OrderEndpoint}}/{{CreateOrder.response.body.orderId}}/pay
+Content-Type: application/json
+
+{
+    "amount": 125.81
+}
+
+###
+
+# @name CancelOrder
+PUT {{OrderEndpoint}}/{{CreateOrder.response.body.orderId}}/cancel
+Content-Type: application/json
+
+###
+
+# @name ScheduleOrder
+PUT {{OrderEndpoint}}/{{CreateOrder.response.body.orderId}}/schedule
+Content-Type: application/json
+
+{
+    "date": "2022-11-28T19:12:37Z"
+}
+
+###
+
+# @name ShipOrder
+PUT {{OrderEndpoint}}/{{CreateOrder.response.body.orderId}}/ship
+Content-Type: application/json
+
+{
+    "date": "2022-11-29T20:00:37Z"
+}
+
+###
+
+# @name GetBooks
+GET {{BookEndpoint}}
+
+###
+
+# @name GetOrders
+GET {{OrderEndpoint}}/{{CreateAccount.response.body.accountId}}
